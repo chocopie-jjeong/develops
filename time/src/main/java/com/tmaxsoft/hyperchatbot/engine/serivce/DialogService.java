@@ -10,6 +10,7 @@ import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.DialogCountDto;
 import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.DialogDto;
 import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.ScenarioDialogCountDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -19,10 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
-@RequiredArgsConstructor
+//@Transactional
+//@RequiredArgsConstructor
 public class DialogService {
 
+    @Autowired
     private DialogRepository dialogRepository;
 
     public List<DialogDto> records(SupervisionRequestDto request, boolean isTotal){
@@ -31,6 +33,8 @@ public class DialogService {
                 :getProjectVersionId(request.getModelData());
         LocalDate start = request.getStartDateTime().toLocalDate();
         LocalDate end = request.getEndDateTime().toLocalDate();
+        System.out.println("request = " + request + ", isTotal = " + isTotal);
+        System.out.println("project = " + project + ", start = " + start + ", end = " + end);
         List<Dialog> totalDialogs = isTotal? dialogRepository.findTotalDialogs(project, start, end)
                 :dialogRepository.findDialogs(project, start, end);
 
@@ -52,42 +56,42 @@ public class DialogService {
                 .build();
     }
 
-    private Long[] dialogCount(String project, LocalDate date, boolean isTotal){
+    private long[] dialogCount(String project, LocalDate date, boolean isTotal){
         List<DialogCountDto> dialogCount =
                 isTotal? dialogRepository.findTotalDialogCount(project, date)
                 :dialogRepository.findDialogCount(project, date);
-        Long[] result = new Long[25];
+        long[] result = new long[25];
         for(DialogCountDto count: dialogCount){
             result[count.getTimeIdx()] = count.getCount();
         }
         return result;
     }
 
-    private HashMap<String, Long[]> botDialogCount(String project, LocalDate date, boolean isTotal){
+    private HashMap<String, long[]> botDialogCount(String project, LocalDate date, boolean isTotal){
 
         List<BotDialogCountDto> botDialogCount =
                 isTotal? dialogRepository.findTotalBotDialogCount(project, date)
                 :dialogRepository.findBotDialogCount(project, date);
-        HashMap<String, Long[]> result = new HashMap<>();
+        HashMap<String, long[]> result = new HashMap<>();
         for(BotDialogCountDto count: botDialogCount){
-            Long[] lst = result.getOrDefault(count.getBotId(), new Long[25]);
+            long[] lst = result.getOrDefault(count.getBotId(), new long[25]);
             lst[count.getTimeIdx()] = count.getCount();
             result.put(count.getBotId(), lst);
         }
         return result;
     }
 
-    private HashMap<String, HashMap<Long, Long[]>> scenarioUsageCount(String project,
+    private HashMap<String, HashMap<Long, long[]>> scenarioUsageCount(String project,
                                                                       LocalDate date,
                                                                       boolean isTotal){
 
         List<ScenarioDialogCountDto> scenarioDialogCount =
                 isTotal? dialogRepository.findTotalScenarioDialogCount(project, date)
                 :dialogRepository.findScenarioDialogCount(project, date);
-        HashMap<String, HashMap<Long, Long[]>> result = new HashMap<>();
+        HashMap<String, HashMap<Long, long[]>> result = new HashMap<>();
         for(ScenarioDialogCountDto count: scenarioDialogCount){
-            HashMap<Long, Long[]> innerMap = result.getOrDefault(count.getBotId(), new HashMap<>());
-            Long[] lst = innerMap.getOrDefault(count.getScenarioId(), new Long[25]);
+            HashMap<Long, long[]> innerMap = result.getOrDefault(count.getBotId(), new HashMap<>());
+            long[] lst = innerMap.getOrDefault(count.getScenarioId(), new long[25]);
             lst[count.getTimeIndex()] = count.getCount();
             innerMap.put(count.getScenarioId(), lst);
             result.put(count.getBotId(), innerMap);
@@ -96,11 +100,11 @@ public class DialogService {
     }
 
     private String getProjectVersionId(ModelDataDto modelData){
-        return String.format("{}_{}", modelData.getProject_id(), modelData.getVersion());
+        return String.format("%s_%s", modelData.getProject_id(), modelData.getVersion());
     }
 
     private String getProjectAllVersion(ModelDataDto modelData){
-        return String.format("{}_%", modelData.getProject_id());
+        return String.format("%s_%%", modelData.getProject_id());
     }
 
 }

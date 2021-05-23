@@ -11,21 +11,54 @@ import java.util.List;
 @Getter
 public class StatisticResponseDto {
 
-    private Long[] projectDialogs;
-    private HashMap<String, Long[]> botTotalDialogs;
-    private HashMap<String, HashMap<Long, Long[]>> scenarioTotalUsage;
+
+    private long[] projectDialogs;
+    private HashMap<String, long[]> botTotalDialogs;
+    private HashMap<String, HashMap<Long, long[]>> scenarioTotalUsage;
 //    private HashMap<String, HashMap<Long, Long[]>> IntentTotalUsage;
 //    private HashMap<String, HashMap<Long, Long[]>> scenarioFallbackTotal;
 
     @Builder
-    public StatisticResponseDto(Long[] projectDialogs,
-                                HashMap<String, Long[]> botTotalDialogs,
-                                HashMap<String, HashMap<Long, Long[]>> scenarioTotalUsage){
+    public StatisticResponseDto(long[] projectDialogs,
+                                HashMap<String, long[]> botTotalDialogs,
+                                HashMap<String, HashMap<Long, long[]>> scenarioTotalUsage){
         this.projectDialogs = projectDialogs;
         this.botTotalDialogs = botTotalDialogs;
         this.scenarioTotalUsage = scenarioTotalUsage;
     }
 
+    public void print(){
+        System.out.println("projectDialogs: "+this.projectDialogs.toString());
+
+        for(String key: botTotalDialogs.keySet()){
+            System.out.print("key "+ key +" = [ " );
+            long[] longs = botTotalDialogs.get(key);
+            for(long a: longs){
+                System.out.print(a+", ");
+            }
+            System.out.println("]");
+        }
+
+
+        for(String key: scenarioTotalUsage.keySet()){
+            System.out.println("bot key = " + key);
+            HashMap<Long, long[]> map = scenarioTotalUsage.get(key);
+            for(Long sKey: map.keySet()){
+                System.out.print("scenario Key = [ ");
+                long[] longs = map.get(sKey);
+                for(long a: longs){
+                    System.out.print(a+", ");
+                }
+                System.out.println("]");
+            }
+
+        }
+
+
+        System.out.println("scenarioTotalUsage = " + scenarioTotalUsage.toString());
+
+
+    }
 }
 
 //

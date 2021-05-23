@@ -8,8 +8,8 @@ import lombok.ToString;
 @Getter
 @AllArgsConstructor
 public class ModelDataDto {
-    private Long project_id;
-    private Integer version;
+    private String project_id;
+    private String version;
     private boolean deploy_status;
     private boolean test_status;
 }
