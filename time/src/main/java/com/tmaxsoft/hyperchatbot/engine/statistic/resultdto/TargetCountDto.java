@@ -8,13 +8,12 @@ import lombok.ToString;
 @Getter
 @ToString
 @AllArgsConstructor
-public class ScenarioDialogCountDto {
+public class TargetCountDto {
 
-    private String botId;
-    private String botName;
-    private Long scenarioId;
-    private String scenarioName;
+    private String Id;
+    private String Name;
+    private String targetId;
+    private String targetName;
     private Integer timeIndex;
     private Long count;
-
 }

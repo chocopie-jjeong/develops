@@ -16,7 +16,6 @@ import javax.persistence.*;
         initialValue = 1,
         allocationSize = 1
 )
-//@NamedEntityGraph(name = "ExtractedEntity.dialog", attributeNodes = @NamedAttributeNode("dialog"))
 @Entity
 public class ExtractedEntity {
 

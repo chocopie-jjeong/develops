@@ -3,21 +3,20 @@ package com.tmaxsoft.hyperchatbot.engine.serivce;
 import com.tmaxsoft.hyperchatbot.engine.controller.requestdto.ModelDataDto;
 import com.tmaxsoft.hyperchatbot.engine.controller.requestdto.SupervisionRequestDto;
 import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.StatisticResponseDto;
+import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.CountValue;
+import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.StatisticVo;
 import com.tmaxsoft.hyperchatbot.engine.statistic.domain.dialog.Dialog;
 import com.tmaxsoft.hyperchatbot.engine.statistic.domain.dialog.DialogRepository;
-import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.BotDialogCountDto;
-import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.DialogCountDto;
-import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.DialogDto;
-import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.ScenarioDialogCountDto;
-import lombok.RequiredArgsConstructor;
+import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 //@Transactional
@@ -27,21 +26,18 @@ public class DialogService {
     @Autowired
     private DialogRepository dialogRepository;
 
-    public List<DialogDto> records(SupervisionRequestDto request, boolean isTotal){
+    public Page<DialogDto> dialogs(SupervisionRequestDto request, Pageable pageable, boolean isTotal){
 
         String project = isTotal? getProjectAllVersion(request.getModelData())
                 :getProjectVersionId(request.getModelData());
         LocalDate start = request.getStartDateTime().toLocalDate();
         LocalDate end = request.getEndDateTime().toLocalDate();
-        System.out.println("request = " + request + ", isTotal = " + isTotal);
-        System.out.println("project = " + project + ", start = " + start + ", end = " + end);
-        List<Dialog> totalDialogs = isTotal? dialogRepository.findTotalDialogs(project, start, end)
-                :dialogRepository.findDialogs(project, start, end);
 
-        List<DialogDto> dialogDtoList = totalDialogs.stream()
-                                                    .map(Dialog::toDialogDto)
-                                                    .collect(Collectors.toList());
-        return dialogDtoList;
+        Page<Dialog> totalDialogs = isTotal? dialogRepository.findTotalDialogs(project, start, end, pageable)
+                :dialogRepository.findDialogs(project, start, end, pageable);
+        Page<DialogDto> map = totalDialogs.map(DialogDto::new);
+
+        return map;
     }
 
     public StatisticResponseDto statistics(SupervisionRequestDto request, boolean isTotal){
@@ -53,50 +49,95 @@ public class DialogService {
                 .projectDialogs(dialogCount(project, date, isTotal))
                 .botTotalDialogs(botDialogCount(project, date, isTotal))
                 .scenarioTotalUsage(scenarioUsageCount(project, date, isTotal))
+                .intentTotalUsage(intentUsageCount(project, date, isTotal))
                 .build();
     }
 
-    private long[] dialogCount(String project, LocalDate date, boolean isTotal){
+    private CountValue dialogCount(String project, LocalDate date, boolean isTotal){
         List<DialogCountDto> dialogCount =
                 isTotal? dialogRepository.findTotalDialogCount(project, date)
                 :dialogRepository.findDialogCount(project, date);
-        long[] result = new long[25];
-        for(DialogCountDto count: dialogCount){
-            result[count.getTimeIdx()] = count.getCount();
+        CountValue countValue = new CountValue();
+        if(isTotal){
+            countValue.setId(project.split("_")[0]);
+        } else{
+            countValue.setId(project);
         }
-        return result;
+        for(DialogCountDto count: dialogCount){
+            if(countValue.getName()==null)
+                countValue.setName(count.getProjectName());
+            countValue.addCount(count.getTimeIndex(), count.getCount());
+        }
+        return countValue;
     }
 
-    private HashMap<String, long[]> botDialogCount(String project, LocalDate date, boolean isTotal){
+    private List<CountValue> botDialogCount(String project, LocalDate date, boolean isTotal){
 
         List<BotDialogCountDto> botDialogCount =
                 isTotal? dialogRepository.findTotalBotDialogCount(project, date)
                 :dialogRepository.findBotDialogCount(project, date);
-        HashMap<String, long[]> result = new HashMap<>();
+        HashMap<String, CountValue> tmpResult = new HashMap<>();
+        CountValue countValue;
         for(BotDialogCountDto count: botDialogCount){
-            long[] lst = result.getOrDefault(count.getBotId(), new long[25]);
-            lst[count.getTimeIdx()] = count.getCount();
-            result.put(count.getBotId(), lst);
+            if(!tmpResult.containsKey(count.getBotId())){
+                countValue = new CountValue(count.getBotId(), count.getBotName());
+            } else{
+                countValue = tmpResult.get(count.getBotId());
+            }
+            countValue.addCount(count.getTimeIndex(), count.getCount());
+            tmpResult.put(count.getBotId(), countValue);
         }
-        return result;
+
+        return new ArrayList(tmpResult.values());
     }
 
-    private HashMap<String, HashMap<Long, long[]>> scenarioUsageCount(String project,
-                                                                      LocalDate date,
-                                                                      boolean isTotal){
+    private List<StatisticVo> scenarioUsageCount(String project,
+                                                 LocalDate date,
+                                                 boolean isTotal){
 
-        List<ScenarioDialogCountDto> scenarioDialogCount =
+        List<TargetCountDto> scenarioDialogCount =
                 isTotal? dialogRepository.findTotalScenarioDialogCount(project, date)
                 :dialogRepository.findScenarioDialogCount(project, date);
-        HashMap<String, HashMap<Long, long[]>> result = new HashMap<>();
-        for(ScenarioDialogCountDto count: scenarioDialogCount){
-            HashMap<Long, long[]> innerMap = result.getOrDefault(count.getBotId(), new HashMap<>());
-            long[] lst = innerMap.getOrDefault(count.getScenarioId(), new long[25]);
-            lst[count.getTimeIndex()] = count.getCount();
-            innerMap.put(count.getScenarioId(), lst);
-            result.put(count.getBotId(), innerMap);
+
+        return getStatisticValues(scenarioDialogCount);
+    }
+
+    private List<StatisticVo> intentUsageCount(String projectId, LocalDate date, boolean isTotal){
+        List<TargetCountDto> intentUsageCount =
+                isTotal? dialogRepository.findTotalIntentUsageCount(projectId, date)
+                :dialogRepository.findIntentUsageCount(projectId, date);
+
+        return getStatisticValues(intentUsageCount);
+    }
+
+    private List<StatisticVo> getStatisticValues(List<TargetCountDto> countDtos){
+        HashMap<String, StatisticVo> tmpResult = new HashMap<>();
+        HashMap<String, HashMap<String, CountValue>> innerMap = new HashMap<>();
+        HashMap<String, CountValue> tmpMap;
+        StatisticVo statisticVo;
+        CountValue countValue;
+        for(TargetCountDto count: countDtos){
+            if(!tmpResult.containsKey(count.getId())){
+                tmpResult.put(count.getId(), new StatisticVo(count.getId(), count.getName()));
+            }
+            tmpMap = innerMap.getOrDefault(count.getId(), new HashMap<>());
+            if(!tmpMap.containsKey(count.getTargetId()))
+                countValue = new CountValue(count.getTargetId(), count.getTargetName());
+            else {
+                countValue = tmpMap.get(count.getTargetId());
+            }
+            countValue.addCount(count.getTimeIndex(), count.getCount());
+            tmpMap.put(count.getTargetId(), countValue);
+            innerMap.put(count.getId(), tmpMap);
         }
-        return result;
+
+        for(String id: innerMap.keySet()){
+            statisticVo = tmpResult.get(id);
+            tmpMap = innerMap.get(id);
+            statisticVo.setValues(new ArrayList(tmpMap.values()));
+            tmpResult.put(id, statisticVo);
+        }
+        return new ArrayList(tmpResult.values());
     }
 
     private String getProjectVersionId(ModelDataDto modelData){

@@ -35,7 +35,7 @@ public class Dialog {
     private Integer timeIndex;
 
 //    @OneToMany(mappedBy = "dialog", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private List<ExtractedEntity> extractedEntities = new ArrayList<>();
+//    private List<ExtractedEntity> extractedEntities;
 
 //    @Column(nullable = false, columnDefinition = "NVARCHAR(20)")
 //    private String userId;
@@ -51,40 +51,39 @@ public class Dialog {
 
     private String botName;
 
-    private Long scenarioId;
+    private String scenarioId;
 
     private String scenarioName;
 
-//    private Long intentId;
-//
-//    private String intentName;
-//
+    private String intentId;
+
+    private String intentName;
+
 //    private Long actionId;
 //
 //    private Boolean isTerminated;
 //
 //    private Boolean isError;
-//
-//    private Integer statusCode;
+
+    private Integer statusCode;
 
     @Builder
     public Dialog(
 //            List<ExtractedEntity> extractedEntities,
-//                  String userId,
-//                  String userMessage,
-                  String projectId,
-                  String projectName,
-                  String botId,
-                  String botName,
-                  Long scenarioId,
-                  String scenarioName
-//                  Long intentId,
-//                  String intentName,
-//                  Long actionId,
-//                  Boolean isTerminated,
-//                  Boolean isError,
-//                  Integer statusCode
-    ) {
+//            String userId,
+//            String userMessage,
+            String projectId,
+            String projectName,
+            String botId,
+            String botName,
+            String scenarioId,
+            String scenarioName,
+            String intentId,
+            String intentName,
+//            Long actionId,
+//            Boolean isTerminated,
+//            Boolean isError,
+            Integer statusCode) {
 //        if(extractedEntities != null) {
 //            this.extractedEntities = extractedEntities;
 //        }
@@ -96,12 +95,12 @@ public class Dialog {
         this.botName = botName;
         this.scenarioId = scenarioId;
         this.scenarioName = scenarioName;
-//        this.intentId = intentId;
-//        this.intentName = intentName;
+        this.intentId = intentId;
+        this.intentName = intentName;
 //        this.actionId = actionId;
 //        this.isTerminated = isTerminated;
 //        this.isError = isError;
-//        this.statusCode = statusCode;
+        this.statusCode = statusCode;
 
         setCreatedTime();
     }
@@ -115,17 +114,5 @@ public class Dialog {
         this.createdDateTime = LocalDateTime.now();
         this.createdDate = this.createdDateTime.toLocalDate();
         this.timeIndex = this.createdDateTime.getHour();
-    }
-
-    public static DialogDto toDialogDto(Dialog dialog){
-        return DialogDto.builder()
-                .projectId(dialog.getProjectId())
-                .projectName(dialog.getProjectName())
-                .botId(dialog.getBotId())
-                .botName(dialog.getBotName())
-                .scenarioId(dialog.getScenarioId())
-                .scenarioName(dialog.getScenarioName())
-                .createdDateTime(dialog.getCreatedDateTime())
-                .build();
     }
 }

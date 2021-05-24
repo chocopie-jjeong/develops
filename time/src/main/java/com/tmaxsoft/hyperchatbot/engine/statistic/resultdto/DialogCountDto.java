@@ -8,6 +8,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @Getter
 public class DialogCountDto {
+
+    private String projectName;
+    private Integer timeIndex;
     private Long count;
-    private Integer timeIdx;
 }
