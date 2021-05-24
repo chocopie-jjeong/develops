@@ -6,6 +6,8 @@ import com.tmaxsoft.hyperchatbot.engine.serivce.DialogService;
 import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.StatisticResponseDto;
 import com.tmaxsoft.hyperchatbot.engine.statistic.domain.dialog.Dialog;
 import com.tmaxsoft.hyperchatbot.engine.statistic.domain.dialog.DialogRepository;
+import com.tmaxsoft.hyperchatbot.engine.statistic.domain.extractedentity.ExtractedEntity;
+import com.tmaxsoft.hyperchatbot.engine.statistic.domain.extractedentity.ExtractedEntityRepository;
 import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.DialogDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,7 @@ public class StatisticController {
 
     private final DialogService dialogService;
     private final DialogRepository dialogRepository;
+    private final ExtractedEntityRepository extractedEntityRepository;
 
     @PostConstruct
     public void initialize(){
@@ -38,7 +41,7 @@ public class StatisticController {
     }
 
     @PostMapping("/dialogs")
-    public Page<DialogDto> serveTotalRecords(@PageableDefault(size=5, sort="projectId",
+    public Page<DialogDto> serveTotalRecords(@PageableDefault(size=15, sort="projectId",
             direction = Sort.Direction.ASC) Pageable pageable,
                                              @RequestBody SupervisionRequestDto request){
         log.info("serveTotalRecords RequestBody: {}", request);
@@ -46,7 +49,7 @@ public class StatisticController {
     }
 
     @PostMapping("/dialogs/project")
-    public Page<DialogDto> serveRecords(@PageableDefault(size=5, sort="projectId",
+    public Page<DialogDto> serveRecords(@PageableDefault(size=15, sort="projectId",
             direction = Sort.Direction.DESC) Pageable pageable,
                                           @RequestBody SupervisionRequestDto request){
 
@@ -235,8 +238,31 @@ public class StatisticController {
                 .statusCode(1)
                 .build();
 
+        ExtractedEntity entity1 = ExtractedEntity.builder()
+                .entityRoleId(1l)
+                .entityRoleName("금액")
+                .value("1000000000")
+                .build();
+
+        entity1.updateDialog(dialog11);
+
+
+        ExtractedEntity entity2 = ExtractedEntity.builder()
+                .entityRoleId(1l)
+                .entityRoleName("금액")
+                .value("1000000000")
+                .build();
+
+        entity2.updateDialog(dialog15);
+
+        dialog11.addExtractedEntity(entity1);
+        dialog15.addExtractedEntity(entity2);
+
+
         dialogRepository.saveAll(Arrays.asList(dialog11,dialog12,dialog13,dialog14,dialog15,
                 dialog21,dialog22,dialog23,dialog24,dialog25,
                 dialog251,dialog252,dialog253,dialog254,dialog255));
+
+        extractedEntityRepository.saveAll(Arrays.asList(entity1, entity2));
     }
 }

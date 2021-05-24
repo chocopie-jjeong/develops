@@ -9,6 +9,8 @@ import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ToString
 @Getter
@@ -22,7 +24,7 @@ public class DialogDto {
     private String scenarioName;
     private String intentId;
     private String intentName;
-//    private @Nullable List<ExtractedEntity> entities;
+    private @Nullable List<EntityDto> entities;
     private LocalDateTime createdDateTime;
     private Integer statusCode;
 
@@ -37,8 +39,14 @@ public class DialogDto {
         this.scenarioName = dialog.getScenarioName();
         this.intentId = dialog.getIntentId();
         this.intentName = dialog.getIntentName();
-//        this.entities = dialog.getExtractedEntities();
+        this.entities = setEntities(dialog.getExtractedEntities());
         this.createdDateTime = dialog.getCreatedDateTime();
         this.statusCode = dialog.getStatusCode();
+    }
+
+    private List<EntityDto> setEntities(List<ExtractedEntity> entities){
+        Stream<EntityDto> entityDtoStream = entities.stream()
+                .map(EntityDto::new);
+        return entityDtoStream.collect(Collectors.toList());
     }
 }

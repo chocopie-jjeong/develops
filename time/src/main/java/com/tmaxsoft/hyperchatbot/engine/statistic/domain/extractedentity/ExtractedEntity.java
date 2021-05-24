@@ -26,20 +26,25 @@ public class ExtractedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "dialog_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "FK_EXTRACTEDENTITY_DIALOG")
+            nullable = false
     )
     private Dialog dialog;
 
     @Column(nullable = false)
     private Long entityRoleId;
 
+    @Column(nullable = false)
+    private String entityRoleName;
+
     @Column(nullable = false, columnDefinition = "NVARCHAR(20)")
     private String value;
 
     @Builder
-    public ExtractedEntity(Long entityRoleId, String value) {
+    public ExtractedEntity(Long entityRoleId,
+                           String entityRoleName,
+                           String value) {
         this.entityRoleId = entityRoleId;
+        this.entityRoleName = entityRoleName;
         this.value = value;
     }
 

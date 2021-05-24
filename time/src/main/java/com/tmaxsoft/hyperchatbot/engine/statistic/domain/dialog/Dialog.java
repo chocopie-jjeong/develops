@@ -26,16 +26,16 @@ public class Dialog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator = "DIALOG_SEQ_GEN")
-    @Column(unique = true, name="dialog_id")
+                    generator = "DIALOG_SEQ_GEN")
+    @Column(unique = true, name= "dialog_id")
     private Long id;
 
     private LocalDateTime createdDateTime;
     private LocalDate createdDate;
     private Integer timeIndex;
 
-//    @OneToMany(mappedBy = "dialog", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private List<ExtractedEntity> extractedEntities;
+    @OneToMany(mappedBy = "dialog", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ExtractedEntity> extractedEntities = new ArrayList<>();
 
 //    @Column(nullable = false, columnDefinition = "NVARCHAR(20)")
 //    private String userId;
@@ -105,10 +105,10 @@ public class Dialog {
         setCreatedTime();
     }
 
-//    public void addExtractedEntity(ExtractedEntity extractedEntity){
-//        this.extractedEntities.add(extractedEntity);
-//        extractedEntity.updateDialog(this);
-//    }
+    public void addExtractedEntity(ExtractedEntity extractedEntity){
+        this.extractedEntities.add(extractedEntity);
+        extractedEntity.updateDialog(this);
+    }
 
     private void setCreatedTime(){
         this.createdDateTime = LocalDateTime.now();

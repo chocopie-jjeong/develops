@@ -3,6 +3,7 @@ package com.tmaxsoft.hyperchatbot.engine.statistic.domain.dialog;
 import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +15,7 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
 
 
     // 해당 프로젝트에 대한 모든 대화 로그 조회
-//    @EntityGraph(attributePaths = "extractedEntities")
+    @EntityGraph(attributePaths = "extractedEntities")
     Page<Dialog> findDialogsByProjectId(String projectId, Pageable pageable);
 
 
@@ -24,7 +25,7 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
             "where d.projectId like :projectAllVersion and " +
             "d.createdDate between :start and :end " +
             "order by d.createdDateTime")
-//    @EntityGraph(attributePaths = "extractedEntities")
+    @EntityGraph(attributePaths = "extractedEntities")
     Page<Dialog> findTotalDialogs(@Param("projectAllVersion") String projectAllVersion,
                                   @Param("start") LocalDate startTime,
                                   @Param("end")LocalDate endTime, Pageable pageable);
@@ -36,7 +37,7 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
             "where d.projectId=:projectId and " +
             "d.createdDate between :start and :end " +
             "order by d.createdDateTime")
-//    @EntityGraph(attributePaths = "extractedEntities")
+    @EntityGraph(attributePaths = "extractedEntities")
     Page<Dialog> findDialogs(@Param("projectId") String projectId,
                              @Param("start") LocalDate startTime,
                              @Param("end")LocalDate endTime, Pageable pageable);
