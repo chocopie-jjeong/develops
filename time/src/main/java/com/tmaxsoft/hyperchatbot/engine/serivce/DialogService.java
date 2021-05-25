@@ -10,10 +10,12 @@ import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.TargetVO
 import com.tmaxsoft.hyperchatbot.engine.statistic.domain.dialog.Dialog;
 import com.tmaxsoft.hyperchatbot.engine.statistic.domain.dialog.DialogRepository;
 import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,11 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 
 @Service
-//@Transactional
-//@RequiredArgsConstructor
+@Transactional
+@RequiredArgsConstructor
 public class DialogService {
 
-    @Autowired
     private DialogRepository dialogRepository;
 
     public Page<DialogDto> dialogs(SupervisionRequestDto request, Pageable pageable, boolean isTotal){

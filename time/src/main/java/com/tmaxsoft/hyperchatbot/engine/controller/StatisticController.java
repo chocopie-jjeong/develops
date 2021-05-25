@@ -34,11 +34,11 @@ public class StatisticController {
     private final DialogRepository dialogRepository;
     private final ExtractedEntityRepository extractedEntityRepository;
 
-    @PostConstruct
-    public void initialize(){
-        init();
-        System.out.println("Save data in DB");
-    }
+//    @PostConstruct
+//    public void initialize(){
+//        init();
+//        System.out.println("Save data in DB");
+//    }
 
     @PostMapping("/dialogs")
     public Page<DialogDto> serveTotalRecords(@PageableDefault(size=15, sort="projectId",
@@ -71,7 +71,7 @@ public class StatisticController {
         return dialogService.statistics(request, false);
     }
 
-    private void init(){
+    private void init(){ // for test
         Dialog dialog11 = Dialog.builder()
                 .projectId("1_1")
                 .projectName("충남대")
