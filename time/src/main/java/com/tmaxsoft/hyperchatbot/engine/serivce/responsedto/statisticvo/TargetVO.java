@@ -11,6 +11,16 @@ import java.util.List;
 public class TargetVO {
     private String targetId;
     private String targetName;
-    private Long total;
-    private List<Long> typeCount = new ArrayList<>();
+    private Long total = 0L;
+    private long[] typeCount = new long[4];
+
+    public TargetVO(String targetId, String targetName) {
+        this.targetId = targetId;
+        this.targetName = targetName;
+    }
+
+    public void addCount(int statusCode, long count){
+        this.total += count;
+        typeCount[statusCode] = count;
+    }
 }

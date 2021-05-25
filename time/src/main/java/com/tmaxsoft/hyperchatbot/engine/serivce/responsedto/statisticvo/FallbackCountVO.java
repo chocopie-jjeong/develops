@@ -20,7 +20,7 @@ public class FallbackCountVO {
         this.name = name;
     }
 
-    public void addScenarios(TargetVO vo){
-        this.values.add(vo);
+    public void setValues(ArrayList<TargetVO> values) {
+        this.values = values;
     }
 }

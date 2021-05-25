@@ -138,7 +138,7 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
             "d.scenarioId, d.scenarioName, d.statusCode, count(d)) " +
             "from Dialog d " +
             "where d.projectId like :projectAllVersion and d.createdDate=:date " +
-            "group by d.scenarioId, d.statusCode" )
+            "group by d.botId, d.scenarioId, d.statusCode" )
     List<FallbackCountDto> findTotalFallbackCount(@Param("projectAllVersion") String projectAllVersion,
                                                   @Param("date") LocalDate date);
 
@@ -149,7 +149,7 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
             "d.scenarioId, d.scenarioName, d.statusCode, count(d)) " +
             "from Dialog d " +
             "where d.projectId=:projectId and d.createdDate=:date " +
-            "group by d.scenarioId, d.statusCode" )
+            "group by d.botId, d.scenarioId, d.statusCode")
     List<FallbackCountDto> findFallbackCount(@Param("projectId") String projectId,
                                              @Param("date") LocalDate date);
 

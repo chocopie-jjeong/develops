@@ -4,7 +4,9 @@ import com.tmaxsoft.hyperchatbot.engine.controller.requestdto.ModelDataDto;
 import com.tmaxsoft.hyperchatbot.engine.controller.requestdto.SupervisionRequestDto;
 import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.StatisticResponseDto;
 import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.CountValue;
+import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.FallbackCountVO;
 import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.StatisticVo;
+import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.TargetVO;
 import com.tmaxsoft.hyperchatbot.engine.statistic.domain.dialog.Dialog;
 import com.tmaxsoft.hyperchatbot.engine.statistic.domain.dialog.DialogRepository;
 import com.tmaxsoft.hyperchatbot.engine.statistic.resultdto.*;
@@ -50,6 +52,7 @@ public class DialogService {
                 .botTotalDialogs(botDialogCount(project, date, isTotal))
                 .scenarioTotalUsage(scenarioUsageCount(project, date, isTotal))
                 .intentTotalUsage(intentUsageCount(project, date, isTotal))
+                .scenarioFallbackTotal(fallbackCount(project, date, isTotal))
                 .build();
     }
 
@@ -108,6 +111,44 @@ public class DialogService {
                 :dialogRepository.findIntentUsageCount(projectId, date);
 
         return getStatisticValues(intentUsageCount);
+    }
+
+    private List<FallbackCountVO> fallbackCount(String projectId, LocalDate date, boolean isTotal) {
+
+        List<FallbackCountDto> fallbackCount =
+                isTotal? dialogRepository.findTotalFallbackCount(projectId, date)
+                : dialogRepository.findFallbackCount(projectId, date);
+
+        HashMap<String, FallbackCountVO> tmpResult = new HashMap<>();
+        HashMap<String, HashMap<String,TargetVO>> innerMap = new HashMap<>(); //botId에 대한 scenarioId에 대한 TargetVO
+        HashMap<String, TargetVO> tmpMap; // 시나리오별 targetVO;
+        FallbackCountVO fallbackCountVO;
+        TargetVO targetVO;
+        for(FallbackCountDto count: fallbackCount){
+            System.out.println("count = " + count);
+            if(!tmpResult.containsKey(count.getBotId())){
+                tmpResult.put(count.getBotId(), new FallbackCountVO(count.getBotId(), count.getBotName()));
+            }
+            tmpMap = innerMap.getOrDefault(count.getBotId(), new HashMap<>());
+
+            if(!tmpMap.containsKey(count.getScenarioId()))
+                targetVO = new TargetVO(count.getScenarioId(), count.getScenarioName());
+            else
+                targetVO = tmpMap.get(count.getScenarioId());
+            System.out.println("targetVO = " + targetVO);
+            if(count.getStatusCode()!=null)
+                targetVO.addCount(count.getStatusCode(), count.getCount());
+            tmpMap.put(count.getScenarioId(), targetVO);
+            innerMap.put(count.getBotId(), tmpMap);
+        }
+        for(String id: tmpResult.keySet()){
+            fallbackCountVO = tmpResult.get(id);
+            tmpMap = innerMap.get(id);
+            fallbackCountVO.setValues(new ArrayList(tmpMap.values()));
+            tmpResult.put(id, fallbackCountVO);
+        }
+
+        return new ArrayList(tmpResult.values());
     }
 
     private List<StatisticVo> getStatisticValues(List<TargetCountDto> countDtos){

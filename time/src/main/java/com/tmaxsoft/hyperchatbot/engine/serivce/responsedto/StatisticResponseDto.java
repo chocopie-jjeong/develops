@@ -1,6 +1,7 @@
 package com.tmaxsoft.hyperchatbot.engine.serivce.responsedto;
 
 import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.CountValue;
+import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.FallbackCountVO;
 import com.tmaxsoft.hyperchatbot.engine.serivce.responsedto.statisticvo.StatisticVo;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,19 +17,19 @@ public class StatisticResponseDto {
     private List<CountValue> botTotalDialogs;
     private List<StatisticVo> scenarioTotalUsage;
     private List<StatisticVo> intentTotalUsage;
-//    private List<FallbackCountVO> scenarioFallbackTotal;
+    private List<FallbackCountVO> scenarioFallbackTotal;
 
     @Builder
     public StatisticResponseDto(CountValue projectDialogs,
                                 List<CountValue> botTotalDialogs,
                                 List<StatisticVo> scenarioTotalUsage,
-                                List<StatisticVo> intentTotalUsage
-//                                List<FallbackCountVO> scenarioFallbackTotal
+                                List<StatisticVo> intentTotalUsage,
+                                List<FallbackCountVO> scenarioFallbackTotal
     ){
         this.projectDialogs = projectDialogs;
         this.botTotalDialogs = botTotalDialogs;
         this.scenarioTotalUsage = scenarioTotalUsage;
         this.intentTotalUsage = intentTotalUsage;
-//        this.scenarioFallbackTotal = scenarioFallbackTotal;
+        this.scenarioFallbackTotal = scenarioFallbackTotal;
     }
 }

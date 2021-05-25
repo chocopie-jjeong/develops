@@ -5,9 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+@AllArgsConstructor
 @ToString
 @Getter
-@AllArgsConstructor
 public class FallbackCountDto {
 
     private String botId;
